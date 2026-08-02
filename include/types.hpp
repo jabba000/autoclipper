@@ -60,6 +60,7 @@ struct CliOptions {
     int min_seg_sec = 10;
     int max_seg_sec = 60;
     double pause_sec = 0.4;
+    int target_clips = 0;  // 0 = auto from timeline / target_seg_sec
     bool verbose = false;
 };
 

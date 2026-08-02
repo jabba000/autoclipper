@@ -26,6 +26,7 @@ void print_usage(const char* argv0) {
         << "      --min-sec N           Min segment length (default: 10)\n"
         << "      --max-sec N           Max segment length (default: 60)\n"
         << "      --pause-sec F         Silence cut threshold seconds (default: 0.4)\n"
+        << "      --target-clips N      Aim for ~N clips (0=auto from duration)\n"
         << "  -v, --verbose             Verbose logging\n"
         << "  -h, --help                Show this help\n\n"
         << "OpenCV DNN models (res10_300x300 SSD):\n"
@@ -59,6 +60,7 @@ std::optional<CliOptions> parse_cli(int argc, char** argv) {
         {"min-sec", required_argument, nullptr, 1003},
         {"max-sec", required_argument, nullptr, 1004},
         {"pause-sec", required_argument, nullptr, 1005},
+        {"target-clips", required_argument, nullptr, 1006},
         {"verbose", no_argument, nullptr, 'v'},
         {"help", no_argument, nullptr, 'h'},
         {nullptr, 0, nullptr, 0},
@@ -82,6 +84,7 @@ std::optional<CliOptions> parse_cli(int argc, char** argv) {
             case 1003: opt.min_seg_sec = std::stoi(optarg); break;
             case 1004: opt.max_seg_sec = std::stoi(optarg); break;
             case 1005: opt.pause_sec = std::stod(optarg); break;
+            case 1006: opt.target_clips = std::stoi(optarg); break;
             default:
                 print_usage(argv[0]);
                 return std::nullopt;

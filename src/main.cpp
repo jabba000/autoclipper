@@ -95,11 +95,18 @@ int main(int argc, char** argv) {
 
         // --- Step 2: semantic slicing --------------------------------------
         std::cout << "[3/5] Semantic slicing (target ~" << opt.target_seg_sec
-                  << "s, pause >" << opt.pause_sec << "s)...\n";
-        auto segments =
-            slice_segments(words, opt.target_seg_sec, opt.min_seg_sec,
-                           opt.max_seg_sec,
-                           static_cast<int>(opt.pause_sec * 1000.0));
+                  << "s, pause >" << opt.pause_sec << "s, target_clips="
+                  << (opt.target_clips > 0 ? std::to_string(opt.target_clips)
+                                           : std::string("auto"))
+                  << ")...\n";
+        SliceOptions slice_opt;
+        slice_opt.target_sec = opt.target_seg_sec;
+        slice_opt.min_sec = opt.min_seg_sec;
+        slice_opt.max_sec = opt.max_seg_sec;
+        slice_opt.pause_ms = static_cast<int>(opt.pause_sec * 1000.0);
+        slice_opt.target_clips = opt.target_clips;
+        slice_opt.verbose = opt.verbose;
+        auto segments = slice_segments(words, slice_opt);
         std::cout << "       " << segments.size() << " valid clips\n";
         if (segments.empty()) {
             std::cerr << "[Warn] No segments in [" << opt.min_seg_sec << ","
