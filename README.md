@@ -1,4 +1,4 @@
-# 🎬 AutoClipper V0.1.0
+# 🎬 AutoClipper V0.1.1
 
 ![C++](https://img.shields.io/badge/C%2B%2B-20-00599C?style=flat&logo=cplusplus)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
