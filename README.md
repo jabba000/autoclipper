@@ -1,8 +1,7 @@
 # 🎬 AutoClipper
 
-![C++](https://img.shields.io/badge/Language-C++-00599C?style=for-the-badge&logo=c%2B%2B)
+![C++](https://img.shields.io/badge/C%2B%2B-20-00599C?style=flat&logo=cplusplus)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-
 
 **An automated, local-first vertical video clipper for YouTube Shorts, TikTok, and Reels.**
 
