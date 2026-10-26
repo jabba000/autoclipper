@@ -1,37 +1,75 @@
-# shorts-maker
+# 🎬 AutoClipper
 
-Утиліта для автоматичного аналізу відео, розпізнавання мови (Whisper) та детекції облич для нарізання найзмістовніших сегментів (кліпів).
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-## 🛠 Збірка (Build)
+**An automated, local-first vertical video clipper for YouTube Shorts, TikTok, and Reels.**
 
-Проєкт використовує CMake. Для автоматичної збірки з нуля виконайте цей скрипт (або команди по черзі) у кореневій директорії проєкту:
+
+
+## ✨ Key Features
+
+* **Intelligent AI Slicing:** Leverages Whisper.cpp for high-accuracy transcription and semantically chunks videos at natural pauses.
+
+
+* **Dynamic Face Tracking:** Utilizes OpenCV DNN (`res10_300x300_ssd`) to ensure the dominant speaker remains perfectly centered in a vertical 9:16 frame.
+
+
+* **TikTok-Style Subtitles:** Automatically generates and burns in lower-third, word-by-word karaoke ASS subtitles featuring Arial Black with a high-visibility yellow and white color scheme.
+
+
+* **Hardware-Accelerated Rendering:** Speeds up FFmpeg video encoding with native, out-of-process support for NVENC, VAAPI, QSV, and x264 fallbacks.
+
+
+* **Concurrent Processing:** Implements a bounded thread pool to process facial tracking, subtitle generation, and rendering jobs in parallel.
+
+
+
+## 🛠️ Prerequisites
+
+To build and run AutoClipper, your system requires the following components:
+
+* **Core Build Tools:** CMake (3.20+) and a C++20 compatible compiler.
+
+
+* **System Libraries:** FFmpeg (accessible via system PATH) and OpenCV (specifically the `core`, `imgproc`, `videoio`, and `dnn` components).
+
+
+* **AI Models:**
+* Whisper GGML model (e.g., `ggml-medium.bin`).
+
+
+* OpenCV Face DNN prototxt (`deploy.prototxt`).
+
+
+* OpenCV Face DNN weights (`res10_300x300_ssd_iter_140000_fp16.caffemodel`).
+
+
+
+
+
+## 🚀 Build Instructions
+
+AutoClipper is built using CMake. Run **b.sh** (./b.sh) or execute the following terminal commands inside the AutoClipper folder to compile the project cleanly:
 
 ```bash
-#!/usr/bin/env bash
-set -euo pipefail
-ROOT="$(cd "$(dirname "$0")" && pwd)"
+# Clean previous builds
+rm -rf build
+mkdir -p build
 
-# Очищення старої збірки для уникнення конфліктів кешу
-rm -rf "$ROOT/build"
-mkdir -p "$ROOT/build"
+# Configure the project in Release mode
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 
-# Конфігурація у режимі Release (максимальна оптимізація швидкості)
-cmake -S "$ROOT" -B "$ROOT/build" -DCMAKE_BUILD_TYPE=Release
-
-# Запуск компіляції на всіх доступних ядрах процесора
-cmake --build "$ROOT/build" -j"$(nproc)"
+# Compile utilizing all available CPU cores
+cmake --build build -j"$(nproc)"
 
 ```
 
-## 🚀 Використання (Usage)
+## 💻 Usage Guide
 
-Після компіляції готовий файл з'явиться у теці `build/`.
-
-Приклад запуску з усіма ключовими параметрами:
+The compiled binary will be located in the `build` directory. You can use **do.sh** (./d.sh) or the standard CLI command structure to process a video:
 
 ```bash
-./build/autoclipper \
-    -i video.mp4 \
+./build/autoclipper -i video.mp4 \
     -m extra/ggml-medium.bin \
     -o ./output \
     -e nvenc \
@@ -41,24 +79,42 @@ cmake --build "$ROOT/build" -j"$(nproc)"
 
 ```
 
-### ⚙️ Опис аргументів командного рядка:
+### 🎛️ Core CLI Arguments
 
-| Прапор | Приклад значення | Призначення |
-| --- | --- | --- |
-| `-i` | `video.mp4` | Шлях до вхідного відеофайлу. |
-| `-m` | `extra/ggml-medium.bin` | Шлях до ваг моделі Whisper (формат GGML) для транскрибації та пошуку пауз. |
-| `-o` | `./output` | Директорія, куди будуть збережені готові нарізані кліпи. |
-| `-e` | `nvenc` | Вибір відеоенкодера. Доступні опції: <br>
+* `-i`, `--input`: **(Required)** Path to the input video file.
 
-<br>• `x264` (обробка процесором, повільно)<br>
 
-<br>• `nvenc` (апаратне прискорення відеокартами NVIDIA)<br>
+* `-o`, `--output`: Output directory for the sliced clips (defaults to `./output`).
 
-<br>• `vaapi` (апаратне прискорення AMD/Intel)<br>
 
-<br>• `qsv` (Intel Quick Sync Video) |
-| `--face-proto` | `extra/deploy.prototxt` | Конфігураційний файл архітектури нейромережі для детекції облич. |
-| `--face-model` | `extra/res10...caffemodel` | Ваги моделі для детекції облич (використовується для правильного кадрування/кропу). |
-| `--target-clips` | `8` | Цільова кількість кліпів. Алгоритм розіб'є мовні регіони, відфільтрує їх за тривалістю/щільністю і намагатиметься видати вказану кількість сегментів, рівномірно розподілених по таймлайну. |
+* `-m`, `--model`: Path to the Whisper GGML model (defaults to `extra/ggml-base.bin`).
 
-> **Порада:** Додайте прапор `-v` (або `--verbose`) в кінці команди, щоб бачити детальну аналітику: які сегменти алгоритм прийняв, а які відхилив і чому (score, reason, тривалість).
+
+* `-e`, `--encoder`: Select the hardware video encoder: `x264`, `nvenc`, `vaapi`, or `qsv` (defaults to `x264`).
+
+
+* `--face-proto` / `--face-model`: Paths to the OpenCV Caffe SSD face tracking files. *Note: Without these files, the software falls back to a static centered 9:16 crop.*
+
+
+* `--target-clips`: Target number of short clips to extract (set to `0` for automatic calculation based on timeline duration).
+
+• *x264 (CPU processing, slow)*
+• *nvenc (hardware acceleration using NVIDIA graphics cards)*
+• *vaapi (hardware acceleration using AMD/Intel)*
+
+
+## 🗺️ Roadmap
+
+* [x] **Ukrainian Language Support:** Fully functional transcription with localized punctuation mapping, silence filtering, and text merging.
+* [ ] **English Localization:** Trivial integration planned for the immediate roadmap to expand transcription and word-boundary rules.
+
+
+
+## 📄 License
+
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+
+### Summary of Terms:
+* **Attribution:** You must retain original copyright notices and give appropriate credit.
+* **Patent Protection:** Includes an explicit grant of patent rights from contributors and protects against patent litigation.
+* **State Changes:** Any modified files must carry prominent notices stating that they were altered.

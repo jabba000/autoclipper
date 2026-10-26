@@ -5,6 +5,8 @@ project(AutoClipper
     LANGUAGES CXX C
 )
 
+# License: Apache License 2.0
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -74,3 +76,4 @@ install(TARGETS autoclipper RUNTIME DESTINATION bin)
 
 message(STATUS "OpenCV: ${OpenCV_VERSION}")
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+

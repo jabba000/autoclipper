@@ -1,6 +1,7 @@
-*.sh
+# *.sh
 output/*
 build/
 video.mp4
+*.mp4
 extra/*.bin
 *.bin
